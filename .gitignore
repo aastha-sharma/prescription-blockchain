@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+api-gateway/node_modules/
+dashboards/*/node_modules/
+
+# Build outputs
+build/
+dist/
+
+# Environment files
+.env
+
+# Blockchain network artifacts
+network/organizations/
+network/channel-artifacts/
+network/crypto-config/
+
+# Logs
+*.log
+
+# macOS system files
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+# Compiled files
+*.tar.gz

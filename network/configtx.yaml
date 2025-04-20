@@ -1,0 +1,184 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: ./organizations/ordererOrganizations/example.com/msp
+  
+  - &DoctorOrg
+    Name: DoctorOrg
+    ID: DoctorMSP
+    MSPDir: ./organizations/peerOrganizations/doctor.example.com/msp
+    Policies:
+      Readers:
+          Type: Signature
+          Rule: "OR('DoctorMSP.member')"
+      Writers:
+          Type: Signature
+          Rule: "OR('DoctorMSP.member')"
+      Admins:
+          Type: Signature
+          Rule: "OR('DoctorMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.doctor.example.com
+        Port: 7051
+  
+  - &PatientOrg
+    Name: PatientOrg
+    ID: PatientMSP
+    MSPDir: ./organizations/peerOrganizations/patient.example.com/msp
+    Policies:
+      Readers:
+          Type: Signature
+          Rule: "OR('PatientMSP.member')"
+      Writers:
+          Type: Signature
+          Rule: "OR('PatientMSP.member')"
+      Admins:
+          Type: Signature
+          Rule: "OR('PatientMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.patient.example.com
+        Port: 8051
+
+  - &PharmacyOrg
+    Name: PharmacyOrg
+    ID: PharmacyMSP
+    MSPDir: ./organizations/peerOrganizations/pharmacy.example.com/msp
+    Policies:
+      Readers:
+          Type: Signature
+          Rule: "OR('PharmacyMSP.member')"
+      Writers:
+          Type: Signature
+          Rule: "OR('PharmacyMSP.member')"
+      Admins:
+          Type: Signature
+          Rule: "OR('PharmacyMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.pharmacy.example.com
+        Port: 9051
+
+  - &RegulatoryOrg
+    Name: RegulatoryOrg
+    ID: RegulatoryMSP
+    MSPDir: ./organizations/peerOrganizations/regulatory.example.com/msp
+    Policies:
+      Readers:
+          Type: Signature
+          Rule: "OR('RegulatoryMSP.member')"
+      Writers:
+          Type: Signature
+          Rule: "OR('RegulatoryMSP.member')"
+      Admins:
+          Type: Signature
+          Rule: "OR('RegulatoryMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.regulatory.example.com
+        Port: 10051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.example.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  OrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      MedConsortium:
+        Organizations:
+          - *DoctorOrg
+          - *PatientOrg
+          - *PharmacyOrg
+          - *RegulatoryOrg
+  
+  PrescriptionChannel:
+    Consortium: MedConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *DoctorOrg
+        - *PatientOrg
+  
+  RefillChannel:
+    Consortium: MedConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *DoctorOrg
+        - *PatientOrg
+        - *PharmacyOrg
+  
+  RegulatoryChannel:
+    Consortium: MedConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *DoctorOrg
+        - *PharmacyOrg
+        - *RegulatoryOrg

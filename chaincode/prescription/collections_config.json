@@ -1,0 +1,26 @@
+[
+    {
+      "name": "patientPrescriptionCollection",
+      "policy": "OR('DoctorMSP.member', 'PatientMSP.member')",
+      "requiredPeerCount": 1,
+      "maxPeerCount": 3,
+      "blockToLive": 1000000,
+      "memberOnlyRead": true
+    },
+    {
+      "name": "pharmacyCollection",
+      "policy": "OR('PharmacyMSP.member', 'DoctorMSP.member')",
+      "requiredPeerCount": 1,
+      "maxPeerCount": 3,
+      "blockToLive": 1000000,
+      "memberOnlyRead": true
+    },
+    {
+      "name": "regulatoryAuditCollection",
+      "policy": "OR('RegulatoryMSP.member', 'DoctorMSP.member')",
+      "requiredPeerCount": 1,
+      "maxPeerCount": 3,
+      "blockToLive": 3000000,
+      "memberOnlyRead": true
+    }
+  ]
